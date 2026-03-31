@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }}</title>
+  <style>
+    :root {
+      --page-bg: #eef3ec;
+      --panel: rgba(255, 255, 255, 0.88);
+      --panel-strong: #ffffff;
+      --ink: #16231d;
+      --muted: #56655d;
+      --accent-blue: #374b82;
+      --accent-green: #284a23;
+      --accent-gold: #bfa057;
+      --accent-soft: #ebe2c9;
+      --border: rgba(55, 75, 130, 0.14);
+      --shadow: 0 18px 40px rgba(20, 36, 28, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px 64px;
+      background:
+        radial-gradient(circle at top left, rgba(55, 75, 130, 0.18), transparent 28%),
+        linear-gradient(180deg, #f6fbf8 0%, var(--page-bg) 100%);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    .hero {
+      padding: 34px;
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(40, 74, 35, 0.96), rgba(55, 75, 130, 0.9)),
+        var(--accent-green);
+      color: #f4faf7;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -90px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(191, 160, 87, 0.22);
+      color: #f7edd0;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 0.98;
+      max-width: 10ch;
+      margin-bottom: 16px;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      font-size: 1.08rem;
+      line-height: 1.65;
+      color: rgba(244, 250, 247, 0.92);
+      margin-bottom: 24px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 0.92rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin: 24px 0 34px;
+    }
+
+    .stat {
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 8px;
+      color: var(--accent-blue);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .section {
+      margin-top: 34px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .section-count {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-green);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel-strong);
+      border-radius: 24px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .meta span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f4f8f5;
+    }
+
+    .card h3 {
+      font-size: 1.26rem;
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    a.button {
+      display: inline-block;
+      padding: 10px 14px;
+      background: var(--accent-blue);
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 0.95rem;
+    }
+
+    a.button:hover {
+      background: var(--accent-green);
+    }
+
+    .footer-note {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 20px 14px 40px;
+      }
+
+      .hero {
+        padding: 24px;
+        border-radius: 22px;
+      }
+
+      .section-header {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Weekly Briefing</div>
+      <h1>{{ title }}</h1>
+      <p class="hero-copy">{{ intro }}</p>
+      <div class="hero-meta">
+        <div class="hero-pill">Issue date: {{ issue_date }}</div>
+        <div class="hero-pill">Sources monitored: {{ total_sources }}</div>
+        <div class="hero-pill">Entries prepared: {{ total_items }}</div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Report summary">
+      {% for stat in category_stats %}
+        <div class="stat">
+          <div class="stat-value">{{ stat.count }}</div>
+          <div class="stat-label">{{ stat.name }}</div>
+        </div>
+      {% endfor %}
+    </section>
+
+    {% for section in grouped_sections %}
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>{{ section.name }}</h2>
+          </div>
+          <div class="section-count">{{ section.source_count }} monitored sources | {{ section.count }} entries</div>
+        </div>
+
+        <div class="cards">
+          {% for item in section.entries %}
+            <article class="card">
+              <div class="meta">
+                <span>{{ item.source }}</span>
+                <span>{{ item.topic_category }}</span>
+                <span>{{ item.source_type }}</span>
+                <span>{{ item.date }}</span>
+              </div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.summary }}</p>
+              <a class="button" href="{{ item.link }}" target="_blank" rel="noopener noreferrer">Open source</a>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+
+    <p class="footer-note">Generated {{ generated_at }}. This layout is ready for real collected summaries when the source-ingestion step is expanded.</p>
+  </main>
+</body>
+</html>

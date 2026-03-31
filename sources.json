@@ -1,0 +1,196 @@
+{
+  "sources": [
+    {
+      "name": "FinCEN News",
+      "category": "Regulatory Updates",
+      "url": "https://www.fincen.gov/news",
+      "type": "web"
+    },
+    {
+      "name": "FinCEN Advisories",
+      "category": "Regulatory Updates",
+      "url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets",
+      "type": "web"
+    },
+    {
+      "name": "OFAC Recent Actions",
+      "category": "Regulatory Updates",
+      "url": "https://ofac.treasury.gov/recent-actions",
+      "type": "web"
+    },
+    {
+      "name": "European Commission AML at EU Level",
+      "category": "Regulatory Updates",
+      "url": "https://finance.ec.europa.eu/financial-crime/anti-money-laundering-and-countering-financing-terrorism-eu-level_en",
+      "type": "web"
+    },
+    {
+      "name": "European Commission High-Risk Third Countries",
+      "category": "Regulatory Updates",
+      "url": "https://finance.ec.europa.eu/financial-crime/high-risk-third-countries-and-international-context-content-anti-money-laundering-and-countering_en",
+      "type": "web"
+    },
+    {
+      "name": "AMLA Latest Media",
+      "category": "Regulatory Updates",
+      "url": "https://www.amla.europa.eu/index_en",
+      "type": "web"
+    },
+    {
+      "name": "EBA AML/CFT",
+      "category": "Regulatory Updates",
+      "url": "https://www.eba.europa.eu/regulation-and-policy/anti-money-laundering-and-countering-financing-terrorism",
+      "type": "web"
+    },
+    {
+      "name": "UK FCA News",
+      "category": "Regulatory Updates",
+      "url": "https://www.fca.org.uk/news",
+      "type": "web"
+    },
+    {
+      "name": "AUSTRAC Media Releases",
+      "category": "Regulatory Updates",
+      "url": "https://www.austrac.gov.au/news-and-media/media-release",
+      "type": "web"
+    },
+    {
+      "name": "IMF AML/CFT",
+      "category": "Regulatory Updates",
+      "url": "https://www.imf.org/topics/financial-integrity/amlcft",
+      "type": "web"
+    },
+    {
+      "name": "DOJ Criminal Division Press Releases",
+      "category": "Enforcement Actions",
+      "url": "https://www.justice.gov/criminal/press-releases",
+      "type": "web"
+    },
+    {
+      "name": "OCC Enforcement Actions",
+      "category": "Enforcement Actions",
+      "url": "https://www.occ.treas.gov/topics/laws-and-regulations/enforcement-actions/index-enforcement-actions.html",
+      "type": "web"
+    },
+    {
+      "name": "Federal Reserve Enforcement Actions",
+      "category": "Enforcement Actions",
+      "url": "https://www.federalreserve.gov/supervisionreg/enforcement-actions-about.htm",
+      "type": "web"
+    },
+    {
+      "name": "SEC Litigation Releases",
+      "category": "Enforcement Actions",
+      "url": "https://www.sec.gov/enforcement-litigation/litigation-releases",
+      "type": "web"
+    },
+    {
+      "name": "FraudBeat",
+      "category": "Enforcement Actions",
+      "url": "https://fradubeat.com",
+      "type": "web"
+    },
+    {
+      "name": "IRS Criminal Investigation Press Releases",
+      "category": "Enforcement Actions",
+      "url": "https://www.irs.gov/compliance/criminal-investigation/criminal-investigation-press-releases",
+      "type": "web"
+    },
+    {
+      "name": "OFSI Sanctions Enforcement Action",
+      "category": "Enforcement Actions",
+      "url": "https://www.gov.uk/government/collections/sanctions-enforcement-action",
+      "type": "web"
+    },
+    {
+      "name": "NCA Money Laundering and Illicit Finance",
+      "category": "Enforcement Actions",
+      "url": "https://www.nationalcrimeagency.gov.uk/what-we-do/crime-threats/money-laundering-and-illicit-finance",
+      "type": "web"
+    },
+    {
+      "name": "OLAF News",
+      "category": "Enforcement Actions",
+      "url": "https://anti-fraud.ec.europa.eu/index_en",
+      "type": "web"
+    },
+    {
+      "name": "Europol Criminal Finances and Money Laundering",
+      "category": "Enforcement Actions",
+      "url": "https://www.europol.europa.eu/crime-areas/economic-crime/money-laundering",
+      "type": "web"
+    },
+    {
+      "name": "INTERPOL Financial Crime",
+      "category": "Enforcement Actions",
+      "url": "https://www.interpol.int/Crimes/Financial-crime",
+      "type": "web"
+    },
+    {
+      "name": "FATF Publications",
+      "category": "Typologies and Case Studies",
+      "url": "https://www.fatf-gafi.org/en/publications.html",
+      "type": "web"
+    },
+    {
+      "name": "APG Typologies Reports",
+      "category": "Typologies and Case Studies",
+      "url": "https://apgml.org/methods-and-trends/page.aspx?p=8d052c1c-b9b8-45e5-9380-29d5aa129f45",
+      "type": "web"
+    },
+    {
+      "name": "MENAFATF Typologies Reports",
+      "category": "Typologies and Case Studies",
+      "url": "https://www.menafatf.org/methods-trends/typologies-reports",
+      "type": "web"
+    },
+    {
+      "name": "ESAAMLG Mutual Evaluations",
+      "category": "Typologies and Case Studies",
+      "url": "https://www.esaamlg.org/index.php/Mutual_Evaluations",
+      "type": "web"
+    },
+    {
+      "name": "GAFILAT Typologies",
+      "category": "Typologies and Case Studies",
+      "url": "https://biblioteca.gafilat.org/?cat=23",
+      "type": "web"
+    },
+    {
+      "name": "Basel Institute Publications",
+      "category": "Typologies and Case Studies",
+      "url": "https://baselgovernance.org/publications",
+      "type": "web"
+    },
+    {
+      "name": "Basel AML Index",
+      "category": "Typologies and Case Studies",
+      "url": "https://baselgovernance.org/publications/basel-aml-index-2025",
+      "type": "web"
+    },
+    {
+      "name": "Wolfsberg Group Resources",
+      "category": "Typologies and Case Studies",
+      "url": "https://wolfsberg-group.org/resources",
+      "type": "web"
+    },
+    {
+      "name": "Thomson Reuters Institute",
+      "category": "Typologies and Case Studies",
+      "url": "https://www.thomsonreuters.com/en/institute",
+      "type": "web"
+    },
+    {
+      "name": "UNODC SHERLOC",
+      "category": "Typologies and Case Studies",
+      "url": "https://sherloc.unodc.org/cld/en/about-us/index.html",
+      "type": "web"
+    },
+    {
+      "name": "StAR Asset Recovery Watch",
+      "category": "Typologies and Case Studies",
+      "url": "https://star.worldbank.org/node/1",
+      "type": "web"
+    }
+  ]
+}

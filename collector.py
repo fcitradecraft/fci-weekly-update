@@ -12,10 +12,9 @@ Goal:
 import json
 import re
 from collections import Counter
-from datetime import datetime
-from email.utils import parsedate_to_datetime
+from datetime import datetime, timedelta
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, parse_qs, unquote, quote as url_quote
 
 import feedparser
 import requests
@@ -30,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SOURCES_FILE = BASE_DIR / "sources.json"
 TEMPLATES_DIR = BASE_DIR / "templates"
 OUTPUT_FILE = BASE_DIR / "output" / "index.html"
-PAGE_TITLE = "Link Collector"
+PAGE_TITLE = "newshound"
 PAGE_INTRO = (
     "A weekly curated update of AML, anti-fraud, anti-financial crime, "
     "sanctions, and compliance developments relevant to practitioners."
@@ -40,6 +39,9 @@ REQUEST_TIMEOUT = 20
 DEFAULT_ITEMS_PER_SOURCE = 2
 MAX_TOTAL_ITEMS = 18
 MAX_ITEMS_PER_REGION = {"US": 8, "International": 10}
+WINDOW_DAYS = 548  # rolling ~18-month freshness window
+UNKNOWN_DATE = "Date unavailable"
+BING_NEWS_RSS = "https://www.bing.com/news/search?q={query}&format=RSS"
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -93,6 +95,38 @@ GENERIC_TITLES = {
 MONTH_NAME_PATTERN = (
     r"(?:Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|"
     r"Sep|Sept|September|Oct|October|Nov|November|Dec|December)"
+)
+_DATE_FORMATS = (
+    "%Y-%m-%dT%H:%M:%S%z",
+    "%Y-%m-%dT%H:%M:%SZ",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d",
+    "%B %d, %Y",
+    "%b %d, %Y",
+    "%B %d %Y",
+    "%b %d %Y",
+    "%d %B %Y",
+    "%d %b %Y",
+    "%m/%d/%Y",
+    "%Y/%m/%d",
+    "%d-%m-%Y",
+)
+_DATE_IN_TEXT = re.compile(
+    r"((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?"
+    r"|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
+    r"\.?\s+\d{1,2},?\s+20\d{2}"
+    r"|20\d{2}[-/](?:0[1-9]|1[0-2])[-/](?:0[1-9]|[12]\d|3[01]))",
+    re.IGNORECASE,
+)
+_ARTICLE_DATE_META = (
+    "article:published_time",
+    "article:modified_time",
+    "og:article:published_time",
+    "og:updated_time",
+    "publish-date",
+    "pubdate",
+    "DC.date.created",
+    "dcterms.created",
 )
 
 
@@ -178,11 +212,23 @@ def discover_feed_url(base_url, soup):
     return None
 
 
-def parse_feed_entries(feed_url, source, issue_date, limit):
+def extract_bing_news_url(bing_redirect_url):
+    """
+    Pull the real article URL out of a Bing News redirect link.
+    Bing RSS encodes the destination as a 'url' query parameter.
+    """
+    qs = parse_qs(urlparse(bing_redirect_url).query)
+    urls = qs.get("url", [])
+    return unquote(urls[0]) if urls else bing_redirect_url
+
+
+def parse_feed_entries(feed_url, source, issue_date, limit, session=None):
     """
     Build items from an RSS or Atom feed.
+    For Bing News RSS, extracts the real article URL from the Bing redirect link.
     """
     parsed_feed = feedparser.parse(feed_url)
+    is_bing_news = "bing.com" in feed_url
     items = []
 
     for entry in parsed_feed.entries[:limit]:
@@ -195,13 +241,16 @@ def parse_feed_entries(feed_url, source, issue_date, limit):
         if not link or not title:
             continue
 
-        published = format_entry_date(entry, issue_date["iso"])
+        if is_bing_news:
+            link = extract_bing_news_url(link)
+
+        published = format_entry_date(entry)
         items.append(
             build_item(
                 source=source,
                 title=title,
                 link=link,
-                summary=summary or f"Recent article discovered from {source['name']}.",
+                summary=summary or f"Recent article from {source['name']}.",
                 date=published,
                 priority=20,
             )
@@ -210,33 +259,45 @@ def parse_feed_entries(feed_url, source, issue_date, limit):
     return items
 
 
-def format_entry_date(entry, fallback_date):
+def format_entry_date(entry):
     """
     Convert feedparser date fields into the YYYY-MM-DD format used by the template.
+    Uses the pre-parsed time struct so this works for both RSS and Atom feeds.
     """
-    for key in ("published", "updated"):
-        raw_value = entry.get(key)
-        if not raw_value:
-            continue
-        try:
-            return parsedate_to_datetime(raw_value).strftime("%Y-%m-%d")
-        except (TypeError, ValueError, IndexError):
-            continue
-    return fallback_date
+    for key in ("published_parsed", "updated_parsed"):
+        parsed = entry.get(key)
+        if parsed:
+            try:
+                return datetime(*parsed[:6]).strftime("%Y-%m-%d")
+            except (TypeError, ValueError):
+                continue
+    return UNKNOWN_DATE
 
 
-def normalize_date_string(raw_value, fallback_date):
+def normalize_date_string(raw_value):
     """
     Convert scraped date text into YYYY-MM-DD when possible.
+    Uses explicit formats only — no fuzzy parsing, which can silently fill missing
+    date parts from today's date and produce wrong results.
     """
     cleaned = clean_text(raw_value)
     if not cleaned:
-        return fallback_date
+        return None
 
-    try:
-        return date_parser.parse(cleaned, fuzzy=True, dayfirst=False).strftime("%Y-%m-%d")
-    except (ValueError, OverflowError, TypeError):
-        return fallback_date
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(cleaned, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+
+    match = _DATE_IN_TEXT.search(cleaned)
+    if match:
+        try:
+            return date_parser.parse(match.group(0), dayfirst=False).strftime("%Y-%m-%d")
+        except (ValueError, OverflowError):
+            pass
+
+    return None
 
 
 def extract_date_from_url(link):
@@ -288,7 +349,7 @@ def extract_candidate_date_text(anchor):
     return date_texts
 
 
-def extract_article_date(anchor, link, fallback_date):
+def extract_article_date(anchor, link):
     """
     Determine the best available date for an HTML-scraped article.
     """
@@ -297,11 +358,78 @@ def extract_article_date(anchor, link, fallback_date):
         return url_date
 
     for candidate in extract_candidate_date_text(anchor):
-        normalized = normalize_date_string(candidate, fallback_date)
-        if normalized != fallback_date:
+        normalized = normalize_date_string(candidate)
+        if normalized:
             return normalized
 
-    return fallback_date
+    return UNKNOWN_DATE
+
+
+def fetch_article_date(session, article_url):
+    """
+    Fetch the article page itself and extract its publication date from meta tags,
+    JSON-LD structured data, or <time> elements.
+    Used as a fallback when the listing page provides no date for a link.
+    """
+    response = safe_request(session, article_url)
+    if response is None:
+        return UNKNOWN_DATE
+
+    soup = BeautifulSoup(response.text, "lxml")
+
+    for name in _ARTICLE_DATE_META:
+        tag = soup.find("meta", attrs={"property": name}) or soup.find("meta", attrs={"name": name})
+        if tag:
+            date = normalize_date_string(tag.get("content", ""))
+            if date:
+                return date
+
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string or "")
+            if isinstance(data, list):
+                data = data[0] if data else {}
+            for key in ("datePublished", "dateModified", "dateCreated"):
+                value = data.get(key, "")
+                if value:
+                    date = normalize_date_string(value)
+                    if date:
+                        return date
+        except (json.JSONDecodeError, AttributeError):
+            continue
+
+    for time_tag in soup.find_all("time"):
+        date = normalize_date_string(time_tag.get("datetime") or time_tag.get_text(" "))
+        if date:
+            return date
+
+    return UNKNOWN_DATE
+
+
+def is_within_window(date_string):
+    """
+    Return True if the item's date falls within the rolling 18-month window,
+    or if the date is unknown (kept but sorted below dated items).
+    """
+    if date_string == UNKNOWN_DATE:
+        return True
+    try:
+        return (
+            datetime.strptime(date_string, "%Y-%m-%d")
+            >= datetime.now() - timedelta(days=WINDOW_DAYS)
+        )
+    except ValueError:
+        return True
+
+
+def build_news_query_url(source):
+    """
+    Construct a Bing News RSS URL from a news_query source's query string.
+    Explicit OR operators are stripped because Bing applies implicit OR between
+    unquoted terms; keeping them causes zero results for complex queries.
+    """
+    query = re.sub(r"\s+OR\s+", " ", source.get("query", ""))
+    return BING_NEWS_RSS.format(query=url_quote(query))
 
 
 def is_generic_title(title):
@@ -337,6 +465,11 @@ def is_candidate_link(link_url, source_url):
         return False
 
     if normalized.endswith((".jpg", ".jpeg", ".png", ".gif", ".pdf", ".svg", ".zip")):
+        return False
+
+    # Reject facet/filter URLs — these are search refinement links, not articles
+    qs = parsed_link.query
+    if qs and ("facet_" in qs or "f%5b" in qs.lower() or "f[" in qs):
         return False
 
     return True
@@ -411,14 +544,19 @@ def extract_link_summary(anchor):
     return shorten_text(summary, 140)
 
 
-def parse_html_entries(response, source, issue_date, limit):
+def parse_html_entries(response, source, issue_date, limit, session):
     """
     Scrape article-like links from the source landing page.
+    Uses the XML parser when the response Content-Type indicates XML,
+    avoiding the XMLParsedAsHTMLWarning and improving parse accuracy.
     """
-    soup = BeautifulSoup(response.text, "lxml")
+    content_type = response.headers.get("Content-Type", "")
+    is_xml = "xml" in content_type or response.text.lstrip().startswith("<?xml")
+    parser = "xml" if is_xml else "lxml"
+    soup = BeautifulSoup(response.text, parser)
     feed_url = discover_feed_url(response.url, soup)
     if feed_url:
-        feed_items = parse_feed_entries(feed_url, source, issue_date, limit)
+        feed_items = parse_feed_entries(feed_url, source, issue_date, limit, session)
         if feed_items:
             return feed_items
 
@@ -451,7 +589,7 @@ def parse_html_entries(response, source, issue_date, limit):
                 "link": link,
                 "summary": extract_link_summary(anchor),
                 "score": score,
-                "date": extract_article_date(anchor, link, issue_date["iso"]),
+                "date": extract_article_date(anchor, link),
             }
         )
 
@@ -459,6 +597,9 @@ def parse_html_entries(response, source, issue_date, limit):
 
     items = []
     for candidate in candidates[:limit]:
+        date = candidate["date"]
+        if date == UNKNOWN_DATE:
+            date = fetch_article_date(session, candidate["link"])
         items.append(
             build_item(
                 source=source,
@@ -468,7 +609,7 @@ def parse_html_entries(response, source, issue_date, limit):
                     candidate["summary"]
                     or f"Recent article discovered from the {source['name']} source page."
                 ),
-                date=candidate["date"],
+                date=date,
                 priority=candidate["score"],
             )
         )
@@ -476,7 +617,7 @@ def parse_html_entries(response, source, issue_date, limit):
     return items
 
 
-def build_item(source, title, link, summary, date, priority=0, is_fallback=False):
+def build_item(source, title, link, summary, date, priority=0):
     """
     Normalize one scraped article into the format the template expects.
     """
@@ -490,48 +631,35 @@ def build_item(source, title, link, summary, date, priority=0, is_fallback=False
         "topic_category": source.get("category", "Uncategorized"),
         "source_type": source.get("type", "web").replace("-", " ").title(),
         "priority": priority,
-        "is_fallback": is_fallback,
     }
 
-
-def build_source_fallback_item(source, issue_date, reason):
-    """
-    Keep the source visible even if scraping fails for that site.
-    """
-    return build_item(
-        source=source,
-        title=f"{source['name']} source page",
-        link=source.get("url", "#"),
-        summary="Click below to Open this Source for Current Updates",
-        date=issue_date["iso"],
-        priority=-100,
-        is_fallback=True,
-    )
 
 
 def fetch_source_items(source, issue_date, session):
     """
     Pull live items from one source definition.
+    Returns an empty list if the source is unreachable or yields nothing —
+    no fallback cards are generated.
     """
+    max_items = int(source.get("max_items", DEFAULT_ITEMS_PER_SOURCE))
+    source_type = source.get("type")
+
+    if source_type == "news_query":
+        feed_url = build_news_query_url(source)
+        return parse_feed_entries(feed_url, source, issue_date, max_items, session)
+
     source_url = source.get("url")
     if not source_url:
-        return [build_source_fallback_item(source, issue_date, "missing source URL")]
+        return []
 
     response = safe_request(session, source_url)
     if response is None:
-        return [build_source_fallback_item(source, issue_date, "request failed")]
+        return []
 
-    max_items = int(source.get("max_items", DEFAULT_ITEMS_PER_SOURCE))
+    if source_type == "rss":
+        return parse_feed_entries(source_url, source, issue_date, max_items, session)
 
-    if source.get("type") == "rss":
-        items = parse_feed_entries(source_url, source, issue_date, max_items)
-    else:
-        items = parse_html_entries(response, source, issue_date, max_items)
-
-    if items:
-        return items
-
-    return [build_source_fallback_item(source, issue_date, "no article links matched")]
+    return parse_html_entries(response, source, issue_date, max_items, session)
 
 
 def build_items_from_sources(sources, issue_date):
@@ -550,46 +678,30 @@ def build_items_from_sources(sources, issue_date):
 
 def limit_items_for_widget(items):
     """
-    Keep the final HTML compact enough for the GoDaddy widget.
+    Apply the 18-month freshness filter, then cap by region and total.
+    Items with unknown dates are kept but sort below confirmed-recent ones.
     """
+    items = [item for item in items if is_within_window(item["date"])]
     limited_items = []
 
     for region in REGION_ORDER:
         region_items = [item for item in items if item["category"] == region]
         region_items.sort(
-            key=lambda item: (
-                not item["is_fallback"],
-                item["priority"],
-                sort_date_value(item["date"]),
-                item["source"],
-                item["title"],
-            ),
+            key=lambda item: (item["priority"], sort_date_value(item["date"])),
             reverse=True,
         )
         limited_items.extend(region_items[: MAX_ITEMS_PER_REGION.get(region, MAX_TOTAL_ITEMS)])
 
     if len(limited_items) > MAX_TOTAL_ITEMS:
         limited_items.sort(
-            key=lambda item: (
-                not item["is_fallback"],
-                item["priority"],
-                sort_date_value(item["date"]),
-                item["source"],
-                item["title"],
-            ),
+            key=lambda item: (item["priority"], sort_date_value(item["date"])),
             reverse=True,
         )
         limited_items = limited_items[:MAX_TOTAL_ITEMS]
 
     return sorted(
         limited_items,
-        key=lambda item: (
-            item["category"],
-            sort_date_value(item["date"]),
-            item["priority"],
-            item["source"],
-            item["title"],
-        ),
+        key=lambda item: (item["category"], sort_date_value(item["date"]), item["priority"]),
         reverse=True,
     )
 

@@ -34,11 +34,11 @@ PAGE_INTRO = (
     "A weekly curated update of AML, anti-fraud, anti-financial crime, "
     "sanctions, and compliance developments relevant to practitioners."
 )
-REGION_ORDER = ["US", "International"]
+REGION_ORDER = ["US - News", "US - Regulatory", "International"]
 REQUEST_TIMEOUT = 20
 DEFAULT_ITEMS_PER_SOURCE = 2
 MAX_TOTAL_ITEMS = 18
-MAX_ITEMS_PER_REGION = {"US": 8, "International": 10}
+MAX_ITEMS_PER_REGION = {"US - News": 5, "US - Regulatory": 5, "International": 8}
 WINDOW_DAYS = 548  # rolling ~18-month freshness window
 UNKNOWN_DATE = "Date unavailable"
 BING_NEWS_RSS = "https://www.bing.com/news/search?q={query}&format=RSS"
@@ -145,15 +145,18 @@ def load_sources():
 
 def get_source_region(source):
     """
-    Split sources into US vs International for report grouping.
+    Return the output section for a source: one of
+    "US - News", "US - Regulatory", or "International".
+    Reads output_section from the source definition first;
+    falls back to URL-pattern detection for sources that lack it.
     """
-    explicit_region = source.get("region")
-    if explicit_region:
-        return explicit_region
+    explicit_section = source.get("output_section")
+    if explicit_section:
+        return explicit_section
 
     hostname = urlparse(source.get("url", "")).netloc.lower()
     if any(pattern in hostname for pattern in US_HOST_PATTERNS):
-        return "US"
+        return "US - News"
     return "International"
 
 

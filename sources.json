@@ -4,114 +4,129 @@
       "name": "FinCEN News",
       "category": "Regulatory Updates",
       "url": "https://www.fincen.gov/news",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - Regulatory"
     },
     {
       "name": "FinCEN Advisories",
       "category": "Regulatory Updates",
       "url": "https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - Regulatory"
     },
     {
       "name": "OFAC Recent Actions",
       "category": "Regulatory Updates",
       "url": "https://ofac.treasury.gov/recent-actions",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - Regulatory"
     },
     {
       "name": "OCC Enforcement Actions",
       "category": "Enforcement Actions",
       "url": "https://www.occ.treas.gov/topics/laws-and-regulations/enforcement-actions/index-enforcement-actions.html",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - Regulatory"
     },
     {
       "name": "Federal Reserve Enforcement Actions",
       "category": "Enforcement Actions",
       "url": "https://www.federalreserve.gov/supervisionreg/enforcement-actions-about.htm",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - Regulatory"
     },
     {
       "name": "DOJ Criminal Division Press Releases",
       "category": "Enforcement Actions",
       "url": "https://www.justice.gov/criminal/press-releases",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - News"
     },
     {
       "name": "SEC Enforcement News",
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "SEC \"litigation release\" OR \"enforcement action\" \"securities fraud\" OR \"insider trading\"",
-      "region": "US",
+      "output_section": "US - Regulatory",
       "max_items": 3
     },
     {
       "name": "IRS Criminal Investigation Press Releases",
       "category": "Enforcement Actions",
       "url": "https://www.irs.gov/compliance/criminal-investigation/criminal-investigation-press-releases",
-      "type": "web"
+      "type": "web",
+      "output_section": "US - News"
     },
     {
       "name": "UK FCA News",
       "category": "Regulatory Updates",
       "url": "https://www.fca.org.uk/news",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "OFSI Sanctions Enforcement",
       "category": "Enforcement Actions",
       "url": "https://www.gov.uk/government/collections/sanctions-enforcement-action",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "NCA Money Laundering and Illicit Finance",
       "category": "Enforcement Actions",
       "url": "https://www.nationalcrimeagency.gov.uk/what-we-do/crime-threats/money-laundering-and-illicit-finance",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "FATF Publications",
       "category": "Typologies and Case Studies",
       "type": "news_query",
       "query": "\"FATF\" OR \"Financial Action Task Force\" typology OR guidance OR \"mutual evaluation\" OR report",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
       "name": "EBA AML/CFT",
       "category": "Regulatory Updates",
       "url": "https://www.eba.europa.eu/regulation-and-policy/anti-money-laundering-and-countering-financing-terrorism",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "AMLA Latest Media",
       "category": "Regulatory Updates",
       "url": "https://www.amla.europa.eu/index_en",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "European Commission AML",
       "category": "Regulatory Updates",
       "url": "https://finance.ec.europa.eu/financial-crime/anti-money-laundering-and-countering-financing-terrorism-eu-level_en",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "Europol Financial Crime",
       "category": "Enforcement Actions",
       "url": "https://www.europol.europa.eu/crime-areas/economic-crime/money-laundering",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "INTERPOL Financial Crime",
       "category": "Enforcement Actions",
       "url": "https://www.interpol.int/Crimes/Financial-crime",
-      "type": "web"
+      "type": "web",
+      "output_section": "International"
     },
     {
       "name": "AUSTRAC Enforcement News",
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "AUSTRAC enforcement \"money laundering\" OR \"financial crime\" Australia",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
@@ -119,7 +134,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "\"money laundering\" AML enforcement indictment conviction settlement",
-      "region": "US",
+      "output_section": "US - News",
       "max_items": 4
     },
     {
@@ -127,7 +142,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "sanctions OFAC violation penalty enforcement action",
-      "region": "US",
+      "output_section": "US - Regulatory",
       "max_items": 3
     },
     {
@@ -135,7 +150,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "\"tax evasion\" prosecution conviction indictment plea",
-      "region": "US",
+      "output_section": "US - News",
       "max_items": 3
     },
     {
@@ -143,7 +158,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "\"wire fraud\" OR \"bank fraud\" OR \"securities fraud\" OR \"mail fraud\" prosecution conviction",
-      "region": "US",
+      "output_section": "US - News",
       "max_items": 3
     },
     {
@@ -151,7 +166,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "FCPA bribery corruption enforcement DOJ SEC",
-      "region": "US",
+      "output_section": "US - News",
       "max_items": 3
     },
     {
@@ -159,7 +174,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "RICO racketeering \"money laundering\" OR \"financial crime\" OR fraud indictment",
-      "region": "US",
+      "output_section": "US - News",
       "max_items": 3
     },
     {
@@ -167,7 +182,7 @@
       "category": "Regulatory Updates",
       "type": "news_query",
       "query": "\"beneficial ownership\" OR FinCEN OR \"Bank Secrecy Act\" AML compliance regulation rule",
-      "region": "US",
+      "output_section": "US - Regulatory",
       "max_items": 3
     },
     {
@@ -175,7 +190,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "\"money laundering\" \"financial crime\" enforcement conviction international",
-      "region": "International",
+      "output_section": "International",
       "max_items": 4
     },
     {
@@ -183,7 +198,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "corruption bribery enforcement prosecution international conviction",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
@@ -191,7 +206,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "sanctions enforcement violation penalty \"financial crime\" EU UK international",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
@@ -199,7 +214,7 @@
       "category": "Typologies and Case Studies",
       "type": "news_query",
       "query": "kleptocracy \"asset recovery\" OR \"asset seizure\" OR \"proceeds of crime\" \"money laundering\"",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
@@ -207,7 +222,7 @@
       "category": "Enforcement Actions",
       "type": "news_query",
       "query": "\"terrorist financing\" OR \"proliferation financing\" OR \"counter-terrorism financing\" enforcement action",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     },
     {
@@ -215,7 +230,7 @@
       "category": "Typologies and Case Studies",
       "type": "news_query",
       "query": "\"financial crime\" typology OR guidance OR advisory OR report FATF AML",
-      "region": "International",
+      "output_section": "International",
       "max_items": 3
     }
   ]

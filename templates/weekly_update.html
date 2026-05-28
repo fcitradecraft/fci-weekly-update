@@ -250,8 +250,8 @@
         <div class="cards">
           {% for item in section.entries %}
             <article class="card">
+              <div class="card-meta">{{ item.date }} &middot; {{ item.source }}</div>
               <p class="card-title"><a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></p>
-              <div class="card-meta">{{ item.source }} &middot; {{ item.date }}</div>
             </article>
           {% endfor %}
         </div>

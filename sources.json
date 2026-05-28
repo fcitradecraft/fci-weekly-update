@@ -40,7 +40,8 @@
       "category": "Enforcement Actions",
       "url": "https://www.justice.gov/criminal/press-releases",
       "type": "web",
-      "output_section": "US - News"
+      "output_section": "US - News",
+      "max_items": 4
     },
     {
       "name": "SEC Enforcement News",
@@ -53,9 +54,10 @@
     {
       "name": "IRS Criminal Investigation Press Releases",
       "category": "Enforcement Actions",
-      "url": "https://www.irs.gov/compliance/criminal-investigation/criminal-investigation-press-releases",
-      "type": "web",
-      "output_section": "US - News"
+      "type": "news_query",
+      "query": "IRS CI tax fraud guilty sentenced convicted",
+      "output_section": "US - News",
+      "max_items": 3
     },
     {
       "name": "UK FCA News",
@@ -149,7 +151,7 @@
       "name": "Tax Evasion Prosecutions",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "\"tax evasion\" prosecution conviction indictment plea",
+      "query": "\"tax evasion\" sentenced convicted charged",
       "output_section": "US - News",
       "max_items": 3
     },
@@ -157,7 +159,7 @@
       "name": "Financial Fraud Prosecutions",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "\"wire fraud\" OR \"bank fraud\" OR \"securities fraud\" OR \"mail fraud\" prosecution conviction",
+      "query": "\"bank fraud\" sentenced convicted charged",
       "output_section": "US - News",
       "max_items": 3
     },
@@ -173,7 +175,7 @@
       "name": "RICO and Racketeering",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "RICO racketeering \"money laundering\" OR \"financial crime\" OR fraud indictment",
+      "query": "racketeering money laundering sentenced convicted",
       "output_section": "US - News",
       "max_items": 3
     },

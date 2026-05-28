@@ -37,8 +37,8 @@ PAGE_INTRO = (
 REGION_ORDER = ["US - News", "US - Regulatory", "International"]
 REQUEST_TIMEOUT = 20
 DEFAULT_ITEMS_PER_SOURCE = 2
-MAX_TOTAL_ITEMS = 18
-MAX_ITEMS_PER_REGION = {"US - News": 5, "US - Regulatory": 5, "International": 8}
+MAX_TOTAL_ITEMS = 30
+MAX_ITEMS_PER_REGION = {"US - News": 10, "US - Regulatory": 10, "International": 10}
 WINDOW_DAYS = 548  # rolling ~18-month freshness window
 UNKNOWN_DATE = "Date unavailable"
 BING_NEWS_RSS = "https://www.bing.com/news/search?q={query}&format=RSS"
@@ -565,6 +565,7 @@ def parse_html_entries(response, source, issue_date, limit, session):
 
     candidates = []
     seen_links = set()
+    position = 0
 
     for anchor in soup.find_all("a", href=True):
         title = clean_text(anchor.get_text(" "))
@@ -593,10 +594,18 @@ def parse_html_entries(response, source, issue_date, limit, session):
                 "summary": extract_link_summary(anchor),
                 "score": score,
                 "date": extract_article_date(anchor, link),
+                "position": position,
             }
         )
+        position += 1
 
-    candidates.sort(key=lambda candidate: candidate["score"], reverse=True)
+    # Sort by date newest-first, then score, then page position (earlier = newer on most
+    # press-release listing pages). This prevents a high-scoring older article from
+    # displacing a more recent one with fewer keyword matches.
+    candidates.sort(
+        key=lambda c: (sort_date_value(c["date"]), c["score"], -c["position"]),
+        reverse=True,
+    )
 
     items = []
     for candidate in candidates[:limit]:

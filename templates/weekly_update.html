@@ -193,6 +193,43 @@
       color: var(--muted);
     }
 
+    .resources-section {
+      margin-top: 34px;
+      padding: 24px 28px;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .resources-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 14px;
+      color: var(--muted);
+    }
+
+    .resource-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .resource-link {
+      display: inline-block;
+      padding: 7px 13px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-green);
+      font-size: 0.86rem;
+      text-decoration: none;
+      border: 1px solid rgba(40, 74, 35, 0.15);
+    }
+
+    .resource-link:hover {
+      background: rgba(40, 74, 35, 0.12);
+      color: var(--ink);
+    }
+
     .footer-note {
       margin-top: 40px;
       color: var(--muted);
@@ -258,7 +295,18 @@
       </section>
     {% endfor %}
 
-    <p class="footer-note">Generated {{ generated_at }}. This layout is ready for real collected summaries when the source-ingestion step is expanded.</p>
+    {% if resources %}
+    <section class="resources-section" aria-label="Official source references">
+      <h2>Official Sources</h2>
+      <div class="resource-links">
+        {% for r in resources %}
+          <a class="resource-link" href="{{ r.url }}" target="_blank" rel="noopener noreferrer">{{ r.name }}</a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <p class="footer-note">Generated {{ generated_at }}.</p>
   </main>
 </body>
 </html>

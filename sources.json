@@ -31,8 +31,8 @@
     {
       "name": "Federal Reserve Enforcement Actions",
       "category": "Enforcement Actions",
-      "url": "https://www.federalreserve.gov/supervisionreg/enforcement-actions-about.htm",
-      "type": "web",
+      "url": "https://www.federalreserve.gov/feeds/press_bcreg.xml",
+      "type": "rss",
       "output_section": "US - Regulatory"
     },
     {
@@ -47,7 +47,7 @@
       "name": "SEC Enforcement News",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "SEC \"litigation release\" OR \"enforcement action\" \"securities fraud\" OR \"insider trading\"",
+      "query": "SEC \"enforcement action\" \"securities fraud\"",
       "output_section": "US - Regulatory",
       "max_items": 3
     },
@@ -84,7 +84,7 @@
       "name": "FATF Publications",
       "category": "Typologies and Case Studies",
       "type": "news_query",
-      "query": "\"FATF\" OR \"Financial Action Task Force\" typology OR guidance OR \"mutual evaluation\" OR report",
+      "query": "FATF typology guidance report",
       "output_section": "International",
       "max_items": 3
     },
@@ -127,7 +127,7 @@
       "name": "AUSTRAC Enforcement News",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "AUSTRAC enforcement \"money laundering\" OR \"financial crime\" Australia",
+      "query": "AUSTRAC \"money laundering\" Australia",
       "output_section": "International",
       "max_items": 3
     },
@@ -183,7 +183,7 @@
       "name": "AML and Compliance Regulation",
       "category": "Regulatory Updates",
       "type": "news_query",
-      "query": "\"beneficial ownership\" OR FinCEN OR \"Bank Secrecy Act\" AML compliance regulation rule",
+      "query": "FinCEN \"beneficial ownership\" AML compliance",
       "output_section": "US - Regulatory",
       "max_items": 3
     },
@@ -191,7 +191,7 @@
       "name": "International AML Enforcement",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "\"money laundering\" \"financial crime\" enforcement conviction international",
+      "query": "\"money laundering\" enforcement conviction international",
       "output_section": "International",
       "max_items": 4
     },
@@ -207,7 +207,7 @@
       "name": "International Sanctions Enforcement",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "sanctions enforcement violation penalty \"financial crime\" EU UK international",
+      "query": "sanctions enforcement penalty EU UK",
       "output_section": "International",
       "max_items": 3
     },
@@ -215,7 +215,7 @@
       "name": "Kleptocracy and Asset Recovery",
       "category": "Typologies and Case Studies",
       "type": "news_query",
-      "query": "kleptocracy \"asset recovery\" OR \"asset seizure\" OR \"proceeds of crime\" \"money laundering\"",
+      "query": "kleptocracy \"asset recovery\" \"money laundering\"",
       "output_section": "International",
       "max_items": 3
     },
@@ -223,7 +223,7 @@
       "name": "Terrorist and Proliferation Financing",
       "category": "Enforcement Actions",
       "type": "news_query",
-      "query": "\"terrorist financing\" OR \"proliferation financing\" OR \"counter-terrorism financing\" enforcement action",
+      "query": "\"terrorist financing\" \"proliferation financing\" enforcement",
       "output_section": "International",
       "max_items": 3
     },
@@ -231,7 +231,7 @@
       "name": "Financial Crime Typologies and Guidance",
       "category": "Typologies and Case Studies",
       "type": "news_query",
-      "query": "\"financial crime\" typology OR guidance OR advisory OR report FATF AML",
+      "query": "\"financial crime\" typology FATF guidance",
       "output_section": "International",
       "max_items": 3
     }

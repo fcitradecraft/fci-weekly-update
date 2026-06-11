@@ -39,6 +39,7 @@ REQUEST_TIMEOUT = 20
 DEFAULT_ITEMS_PER_SOURCE = 2
 MAX_TOTAL_ITEMS = 30
 MAX_ITEMS_PER_REGION = {"US - News": 10, "US - Regulatory": 10, "International": 10}
+MAX_ITEMS_PER_DOMAIN = 2
 WINDOW_DAYS = 548  # rolling ~18-month freshness window
 UNKNOWN_DATE = "Date unavailable"
 BING_NEWS_RSS = "https://www.bing.com/news/search?q={query}&format=RSS"
@@ -69,6 +70,14 @@ INVALID_LINK_PATTERNS = (
     "/signin",
     "/register",
     "/account",
+    # OFAC reference/service pages (not individual enforcement actions)
+    "/sanctions-programs-and-country-information/",
+    "/sanctions-list-service",
+    "/consolidated-sanctions-list",
+    "/other-ofac-sanctions-lists",
+    "/ofac-sanctions-list",
+    "/sdn",
+    "/faqs/",
 )
 US_HOST_PATTERNS = (
     "fincen.gov",
@@ -91,7 +100,62 @@ GENERIC_TITLES = {
     "news & media",
     "speaking engagements",
     "read 2025 press release",
+    # Navigation / listing page titles observed in practice
+    "sanctions list updates",
+    "consolidated sanctions list (non-sdn lists)",
+    "consolidated sanctions list",
+    "sanctions list service",
+    "other ofac sanctions lists",
+    "search ofac's sanctions lists",
+    "search ofac sanctions lists",
+    "research publications & data analysis",
+    "publications & data analysis",
+    "recent actions",
+    "latest news",
+    "news and events",
+    "news & events",
+    "enforcement actions",
+    "recent enforcement actions",
+    "show all updates",
+    "news & press rss feed",
+    "news & press feed",
+    "news articles",
+    "recent reporting form updates",
+    "federal reserve balance sheet developments",
+    "federal reserve supervision and regulation report",
+    "information on administrative sanctions",
+    "remuneration and diversity analysis",
+    # Federal Reserve navigation links and off-topic releases
+    "speeches & testimony",
+    "speeches and testimony",
+    "frauds and scams",
+    # Federal Reserve statistical / data releases (off-topic for AML monitoring)
+    "structure and share data for u.s. offices of foreign banks",
+    "structure and share data for the u.s. offices of foreign banks",
+    "charge-off and delinquency rates on loans and leases at commercial banks",
+    "financial accounts of the united states",
+    "consumer credit",
+    "assets and liabilities of commercial banks in the u.s.",
 }
+OFFICIAL_DOMAINS = (
+    "fincen.gov",
+    "treasury.gov",
+    "justice.gov",
+    "occ.treas.gov",
+    "federalreserve.gov",
+    "sec.gov",
+    "irs.gov",
+    "fca.org.uk",
+    "gov.uk",
+    "eba.europa.eu",
+    "amla.europa.eu",
+    "finance.ec.europa.eu",
+    "europol.europa.eu",
+    "fatf-gafi.org",
+    "interpol.int",
+    "nationalcrimeagency.gov.uk",
+    "austrac.gov.au",
+)
 MONTH_NAME_PATTERN = (
     r"(?:Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|"
     r"Sep|Sept|September|Oct|October|Nov|November|Dec|December)"
@@ -242,6 +306,9 @@ def parse_feed_entries(feed_url, source, issue_date, limit, session=None):
         )
 
         if not link or not title:
+            continue
+
+        if is_generic_title(title):
             continue
 
         if is_bing_news:
@@ -428,8 +495,8 @@ def is_within_window(date_string):
 def build_news_query_url(source):
     """
     Construct a Bing News RSS URL from a news_query source's query string.
-    Explicit OR operators are stripped because Bing applies implicit OR between
-    unquoted terms; keeping them causes zero results for complex queries.
+    Explicit OR operators are stripped — Bing News RSS returns zero results
+    when the query contains boolean OR syntax.
     """
     query = re.sub(r"\s+OR\s+", " ", source.get("query", ""))
     return BING_NEWS_RSS.format(query=url_quote(query))
@@ -442,7 +509,14 @@ def is_generic_title(title):
     lowered = clean_text(title).lower()
     if lowered in GENERIC_TITLES:
         return True
-    if lowered.startswith(("view ", "see all ", "read ", "skip to ")):
+    if lowered.startswith(("view ", "see all ", "read ", "skip to ", "list of ", "index of ")):
+        return True
+    if lowered.endswith(("rss feed",)):
+        return True
+    if "blogposts" in lowered or "blog posts" in lowered:
+        return True
+    # Federal Reserve statistical release codes (H.x, G.x, Z.x series)
+    if re.search(r"\b[ghz]\.\d", lowered):
         return True
     return False
 
@@ -557,11 +631,12 @@ def parse_html_entries(response, source, issue_date, limit, session):
     is_xml = "xml" in content_type or response.text.lstrip().startswith("<?xml")
     parser = "xml" if is_xml else "lxml"
     soup = BeautifulSoup(response.text, parser)
-    feed_url = discover_feed_url(response.url, soup)
-    if feed_url:
-        feed_items = parse_feed_entries(feed_url, source, issue_date, limit, session)
-        if feed_items:
-            return feed_items
+    if not source.get("disable_feed_discovery"):
+        feed_url = discover_feed_url(response.url, soup)
+        if feed_url:
+            feed_items = parse_feed_entries(feed_url, source, issue_date, limit, session)
+            if feed_items:
+                return feed_items
 
     candidates = []
     seen_links = set()
@@ -633,6 +708,9 @@ def build_item(source, title, link, summary, date, priority=0):
     """
     Normalize one scraped article into the format the template expects.
     """
+    hostname = urlparse(link).netloc.lower()
+    if any(domain in hostname for domain in OFFICIAL_DOMAINS):
+        priority += 15
     return {
         "title": shorten_text(title, 120),
         "source": source.get("name", "Unknown Source"),
@@ -676,16 +754,27 @@ def fetch_source_items(source, issue_date, session):
 
 def build_items_from_sources(sources, issue_date):
     """
-    Pull recent items from each source and combine them into one flat list.
+    Pull recent items from each source.
+    Returns (items, resources) where resources are official web sources
+    that yielded no article links and should be shown as reference links.
     """
     items = []
+    resources = []
     session = requests.Session()
 
     for source in sources:
         print(f"  Fetching recent items from {source.get('name', 'Unknown Source')}...")
-        items.extend(fetch_source_items(source, issue_date, session))
+        source_items = fetch_source_items(source, issue_date, session)
+        if source_items:
+            items.extend(source_items)
+        elif source.get("type") == "web" and source.get("url"):
+            resources.append({
+                "name": source["name"],
+                "url": source["url"],
+                "section": source.get("output_section", ""),
+            })
 
-    return limit_items_for_widget(items)
+    return limit_items_for_widget(items), resources
 
 
 def limit_items_for_widget(items):
@@ -694,6 +783,21 @@ def limit_items_for_widget(items):
     Items with unknown dates are kept but sort below confirmed-recent ones.
     """
     items = [item for item in items if is_within_window(item["date"])]
+
+    # Deduplicate by URL and cap per domain so no single publisher dominates.
+    # Items are sorted best-first so the highest-priority copy of each URL wins.
+    seen_urls: set[str] = set()
+    domain_counts: dict[str, int] = {}
+    unique_items = []
+    for item in sorted(items, key=lambda i: (i["priority"], sort_date_value(i["date"])), reverse=True):
+        url = item["link"].rstrip("/")
+        domain = urlparse(url).netloc
+        if url not in seen_urls and domain_counts.get(domain, 0) < MAX_ITEMS_PER_DOMAIN:
+            seen_urls.add(url)
+            domain_counts[domain] = domain_counts.get(domain, 0) + 1
+            unique_items.append(item)
+    items = unique_items
+
     limited_items = []
 
     for region in REGION_ORDER:
@@ -794,7 +898,7 @@ def build_category_stats(items):
     return stats
 
 
-def render_and_save_html(grouped_items, issue_date, items):
+def render_and_save_html(grouped_items, issue_date, items, resources=None):
     """
     Render the Jinja template and save final HTML to output/index.html.
     """
@@ -811,6 +915,7 @@ def render_and_save_html(grouped_items, issue_date, items):
         total_sources=len({item["source"] for item in items}),
         category_stats=build_category_stats(items),
         grouped_sections=ordered_sections,
+        resources=resources or [],
     )
     html = compact_html_output(html)
 
@@ -839,13 +944,13 @@ def main():
         issue_date = get_issue_date()
 
         print("Step 2/4: Building items...")
-        items = build_items_from_sources(sources, issue_date)
+        items, resources = build_items_from_sources(sources, issue_date)
 
         print("Step 3/4: Grouping by category...")
         grouped_items = group_items_by_category(items)
 
         print("Step 4/4: Rendering HTML...")
-        render_and_save_html(grouped_items, issue_date, items)
+        render_and_save_html(grouped_items, issue_date, items, resources)
 
         print(f"Done. Weekly update page created: {OUTPUT_FILE}")
     except FileNotFoundError as exc:

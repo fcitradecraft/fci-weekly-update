@@ -54,8 +54,8 @@
     {
       "name": "Banking Dive",
       "category": "Regulatory Updates",
-      "url": "https://www.bankingdive.com/feeds/news/",
-      "type": "rss",
+      "type": "news_query",
+      "query": "bankingdive AML compliance enforcement regulation banking",
       "output_section": "US - Regulatory",
       "max_items": 2
     },

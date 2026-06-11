@@ -44,6 +44,22 @@
       "max_items": 4
     },
     {
+      "name": "CoinDesk",
+      "category": "Enforcement Actions",
+      "type": "news_query",
+      "query": "coindesk crypto enforcement regulation \"money laundering\"",
+      "output_section": "US - News",
+      "max_items": 2
+    },
+    {
+      "name": "Banking Dive",
+      "category": "Regulatory Updates",
+      "url": "https://www.bankingdive.com/feeds/news/",
+      "type": "rss",
+      "output_section": "US - Regulatory",
+      "max_items": 2
+    },
+    {
       "name": "SEC Enforcement News",
       "category": "Enforcement Actions",
       "type": "news_query",

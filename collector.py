@@ -156,6 +156,16 @@ OFFICIAL_DOMAINS = (
     "nationalcrimeagency.gov.uk",
     "austrac.gov.au",
 )
+PAYWALL_DOMAINS = (
+    "news.bloomberglaw.com",
+    "www.law.com",
+    "www.americanbanker.com",
+    "www.afr.com",
+    "www.theaustralian.com.au",
+    "www.ft.com",
+    "www.wsj.com",
+    "www.economist.com",
+)
 MONTH_NAME_PATTERN = (
     r"(?:Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|"
     r"Sep|Sept|September|Oct|October|Nov|November|Dec|December)"
@@ -711,6 +721,8 @@ def build_item(source, title, link, summary, date, priority=0):
     hostname = urlparse(link).netloc.lower()
     if any(domain in hostname for domain in OFFICIAL_DOMAINS):
         priority += 15
+    elif any(domain in hostname for domain in PAYWALL_DOMAINS):
+        priority -= 10
     return {
         "title": shorten_text(title, 120),
         "source": source.get("name", "Unknown Source"),
